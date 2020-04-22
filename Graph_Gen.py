@@ -1,7 +1,8 @@
 import sys
 import re
 import numpy
-# YOUR CODE GOES HERE
+
+# This function checks for the intersection point(s) between two lines
 def checks(x1,y1,x2,y2,x3,y3,x4,y4):
     try:
         t = ( ((x1-x3)*(y3-y4)) - ((y1-y3)*(x3-x4)) )/( ((x1-x2)*(y3-y4)) - ((y1-y2)*(x3-x4)) )
@@ -10,11 +11,13 @@ def checks(x1,y1,x2,y2,x3,y3,x4,y4):
         if (u < 0 or u > 1 or t < 0 or t > 1):
             return 0
 
+        # Executes if only one intersection point between two lines exist
         if ((0 <= u <= 1) and (0 <= t <= 1)):
             x_coord = x1 + (t * (x2 - x1))
             y_coord = y1 + (t * (y2 - y1))
             return [(float("{0:.2f}".format(x_coord)),float("{0:.2f}".format(y_coord)))]
     except:
+        # These statements describe overlapping line segment scenarios for all orientations and returns both intersection points
         if ((x3 <= x1 <= x4 and x3 <= x2 <= x4 and y3 <= y1 <= y4 and y3 <= y2 <= y4) or
             (x4 <= x1 <= x3 and x4 <= x2 <= x3 and y4 <= y1 <= y3 and y4 <= y2 <= y3) or
             (x3 <= x1 <= x4 and x3 <= x2 <= x4 and y3 >= y1 >= y4 and y3 >= y2 >= y4) or
@@ -53,40 +56,51 @@ def checks(x1,y1,x2,y2,x3,y3,x4,y4):
     
     return 0
 
+# Calculates the distance between two points
 def distance(refx, refy, intx, inty):
     dist = sqrt((intx - refx)**2 + (inty - refy)**2)
     return dist
 
 def main():
 
+    # Regular expressions which govern an acceptable input format for each command: a,c,r,g
     a = re.compile(r'^\s*[a]\s+["][a-zA-Z\s]+\s*["]\s+([(]\s*-?[0-9]+\s*[,]\s*-?[0-9]+\s*[)]\s*){2,}\s*$')
     c = re.compile(r'^\s*[c]\s+["][a-zA-Z\s]+\s*["]\s+([(]\s*-?[0-9]+\s*[,]\s*-?[0-9]+\s*[)]\s*){2,}\s*$')
     r = re.compile(r'^\s*[r]\s+["][a-zA-Z\s]+\s*["]\s*$')
     g = re.compile(r'^\s*[g]\s*$')
 
-    condition = True
+    # Dictionary which stores all street names and corresponding poly-line segment coordinates in string format
     street_info = {}
 
-    while condition:
+    while True:
         prompt = input()
 
+        # Simple counter to keep track of the number of entries in the dictionary
         count = 0
         for key in street_info:
             count += 1
 
+        # Parse user input and store the street name along with all coordinates into variables "street" and "coord" respectively
         street = re.search('["][a-zA-Z\s]+\s*["]', prompt)
         coord = re.search('([(]\s*-?[0-9]+\s*[,]\s*-?[0-9]+\s*[)]\s*){2,}\s*', prompt)
 
+
+        # Each if statement contains procedures related to each command type -> this entire if-else block acts as a switch statement 
+
+        # a = adding a new street
         if a.fullmatch(prompt):
+            # Next 2 lines format the street name to lowercase and strips all white space in coordinates
             street_key = street.group().lower() 
             street_value = coord.group().replace(" ", "").replace(")", ".0)").replace(",", ".0,").replace(")(", ") (").split(" ")
 
+            # Checks if street name already exists in the dictionary before adding it (no duplicate streets allowed)
             if street_key in street_info:
                 print("Error: Street name already exists in the system, no duplicate entries allowed.", file = sys.stderr)
             else:
                 street_info[street_key] = street_value
                 count += 1
 
+        # c = change the coordiantes of an existing street
         elif c.fullmatch(prompt):
             if count == 0:
                 print("Error: Cannot change specified street when no street has been added to the system.", file = sys.stderr)
@@ -94,11 +108,13 @@ def main():
                 street_key = street.group().lower() 
                 street_value = coord.group().replace(" ", "").replace(")", ".0)").replace(",", ".0,").replace(")(",") (").split(" ")
               
+                # Replaces coordinates for the street that is changed
                 if street_key in street_info:
                     street_info[street_key] = street_value
                 else:
                     print("Error: 'c' specified for a street that does not exist.", file = sys.stderr)
                     
+        # r = remove an existing street
         elif r.fullmatch(prompt):
             if count == 0:
                 print("Error: System does not have any entries to remove.", file = sys.stderr)
@@ -110,20 +126,28 @@ def main():
                 else:
                     print("Error: 'r' specified for a street that does not exist.", file = sys.stderr)
                    
+        # g = graph the street map to produce an undirected graph
         elif g.fullmatch(prompt):
-            check = not bool(street_info)
 
-            if check == True:
+            # Assesses whether any streets have been added to the system
+            check = bool(street_info)
+
+            if check == False:
                 print("Error: Cannot issue graphing command as no streets have been added.", file = sys.stderr)
             else:
+                # Copy of street_info dictionary - except all coordinates are type-casted to Tuples!
                 converted = {}
                 for key,value in street_info.items():
                     converted[str(key)] = [eval(item) for item in value]
 
+                # Stores all vertices and edges in these two arrays
                 vertices = []
                 edges = []
+
+                # This block of code goes through all line segments for every street in the dictionary and evaluates them with each other to determine all intersection points in the street map
                 for key_temp in converted:
-                
+                    
+                    # Stores all intersection points in the street map 
                     ip_dict = {}
 
                     value_curr = converted[key_temp]
