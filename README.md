@@ -1,4 +1,4 @@
-# Street-Map-Intersection-Identifier
+# Street Map Intersection Identifier
 
 ## Purpose
 Calculates all intersection points, vertices and edges from a poly-line street map to produce an undirected graph.
