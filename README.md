@@ -66,4 +66,4 @@ E = {
 **Graphical Representation:**
 
 ![](Example_Graph.png)
-**NOTE:** graphed using Desmos: https://www.desmos.com/calculator
+**_Note:_** _graphed using Desmos:_ https://www.desmos.com/calculator
